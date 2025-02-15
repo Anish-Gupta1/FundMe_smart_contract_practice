@@ -8,21 +8,21 @@ import {PriceConvertor} from "./PriceConvertor.sol";
 contract FundMe {
     using PriceConvertor for uint; 
 
-    uint public minUsd = 5e18;
+    uint public constant MIN_USD = 5e18;
 
     address[] public funders;
 
     mapping(address funder => uint amt) public addressToAmtFunded ; 
 
     function fund() public payable {
-        require(msg.value.getConversion() > minUsd, "Didnt send enough eth") ; 
+        require(msg.value.getConversion() > MIN_USD, "Didnt send enough eth") ; 
         funders.push(msg.sender);
         addressToAmtFunded[msg.sender] += msg.value ; 
     }
 
-    address public owner;
+    address public immutable i_owner;
     constructor(){
-        owner = msg.sender;
+        i_owner = msg.sender;
     }
 
     function Withdraw() public onlyOwner {
@@ -45,9 +45,9 @@ contract FundMe {
         (bool isCall,) = payable(msg.sender).call{value: address(this).balance}("");
         require(isCall, "Call failed");
     }
-    
+
     modifier onlyOwner(){
-        require(msg.sender == owner , "Must be the owner.");
+        require(msg.sender == i_owner , "Must be the owner.");
         _;
     }
 }
